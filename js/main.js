@@ -1,9 +1,10 @@
 import { route, start } from './router.js';
-import { mountColourBar } from './theme.js';
+import { mountAccessibility } from './theme.js';
+import './sound.js';
 import { mountExitIntent } from './exit.js';
 import { store } from './state.js';
 
-mountColourBar(document.getElementById('colour-bar-root'));
+mountAccessibility(document.getElementById('a11y-root'));
 
 const S = name => () => import(`./screens/${name}.js`);
 route('/', S('intro'), 'intro');

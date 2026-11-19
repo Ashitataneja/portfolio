@@ -2,6 +2,7 @@
 import { h, title, deco, icon, img, esc, logo, shutter, announce, reducedMotion } from '../ui.js';
 import { PROJECTS, STAGES } from '../content.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 const apertureIcon = `<svg viewBox="-50 -50 100 100" aria-hidden="true"><circle r="46" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="6"/>${Array.from({ length: 6 }, (_, i) =>
   `<path transform="rotate(${i * 60})" d="M-6 -12 L 8 -42 A42 42 0 0 1 34 -24 L 12 -4 Z" fill="var(--c-ink)"/>`).join('')}<circle r="10" fill="var(--c-paper)"/></svg>`;
@@ -15,15 +16,15 @@ export async function render({ id, stage }, { go }) {
   const el = h(`<section class="screen case bg-grid" aria-labelledby="case-h">
     ${logo()}
     <nav class="case__index" aria-label="Case study stages">
-      <ol>${STAGES.map((s, k) => `<li><a href="#/work/${p.id}/case/${k + 1}" data-k="${k}" class="case__chip"><span class="n">${k + 1}</span>${esc(s.name)}</a></li>`).join('')}</ol>
+      <ol>${STAGES.map((s, k) => `<li><a href="#/work/${p.id}/case/${k + 1}" data-k="${k}" class="case__chip" data-sound="none"><span class="n">${k + 1}</span>${esc(s.name)}</a></li>`).join('')}</ol>
     </nav>
     <div class="case__stage" aria-live="polite"></div>
     <div class="case__controls">
-      <button class="btn btn--lg case__prev" type="button">${icon('arrow-l')} Previous</button>
+      <button class="btn btn--lg case__prev" type="button" data-sound="none">${icon('arrow-l')} Previous</button>
       <div class="case__shutter-wrap">
         ${deco('burst', 'burst', 'left:-62%;top:18%;transform:rotate(-100deg) scale(.7)')}
         ${deco('burst', 'burst', 'right:-62%;top:18%;transform:rotate(80deg) scale(.7) scaleY(-1)')}
-        <button class="case__shutter" type="button">${apertureIcon}<span class="sr-only">Next stage</span></button>
+        <button class="case__shutter" type="button" data-sound="none">${apertureIcon}<span class="sr-only">Next stage</span></button>
         <span class="case__shutter-label" aria-hidden="true">Next</span>
       </div>
       <div class="case__evidence-slot"></div>
@@ -84,7 +85,7 @@ export async function render({ id, stage }, { go }) {
           <div><h3>${esc(ev.title)}</h3><p>${esc(ev.text)}</p></div>
           <button class="case__ev-x" type="button" aria-label="Close evidence">${icon('close')}</button>
          </aside>`
-      : `<button class="case__ev-open" type="button" aria-expanded="false" aria-controls="evidence">
+      : `<button class="case__ev-open" type="button" data-sound="focus" aria-expanded="false" aria-controls="evidence">
           <span class="case__ev-icon">${icon('camera')}</span><span><b>Evidence</b><small>See research material</small></span></button>`;
     evSlot.querySelector('.case__ev-open')?.addEventListener('click', () => toggleEv(true));
     evSlot.querySelector('.case__ev-x')?.addEventListener('click', () => toggleEv(false));
@@ -101,7 +102,8 @@ export async function render({ id, stage }, { go }) {
     if (n < 0) return;
     busy = true;
     if (withShutter) await shutter();
-    else if (!reducedMotion()) { stageEl.classList.add('is-flip'); await new Promise(r => setTimeout(r, 160)); }
+    else { play('wind'); }
+    if (!withShutter && !reducedMotion()) { stageEl.classList.add('is-flip'); await new Promise(r => setTimeout(r, 160)); }
     i = n; paint();
     stageEl.classList.remove('is-flip');
     stageEl.classList.add('is-develop');

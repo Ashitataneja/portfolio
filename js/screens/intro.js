@@ -1,6 +1,7 @@
 // Screens 01–03: aperture opens → zoom through the lens → instant camera prints the first photo.
 import { h, title, deco, apertureSVG, setAperture, animate, wait, reducedMotion, shutterSound, announce } from '../ui.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 export const cameraSVG = () => `
 <svg class="ic-camera" viewBox="0 0 640 470" aria-hidden="true">
@@ -48,7 +49,7 @@ export async function render() {
       <div class="fc-camera">
         ${cameraSVG()}
         <div class="fc-slot">
-          <button class="fc-photo" type="button" aria-label="Take the photograph and step into my design world" disabled>
+          <button class="fc-photo" type="button" data-sound="none" aria-label="Take the photograph and step into my design world" disabled>
             <span class="fc-photo__inner"></span>
           </button>
         </div>
@@ -77,7 +78,7 @@ export async function render() {
     if (cancelled) return;
     // Print: the blank photograph emerges from the slot
     photo.classList.add('is-printing');
-    shutterSound();
+    play('shutter'); setTimeout(() => play('print', 1.45), 120);
     await wait(reducedMotion() ? 0 : 1500);
     photo.disabled = false;
     photo.classList.add('is-ready');
@@ -88,10 +89,11 @@ export async function render() {
   async function play() {
     await wait(450);
     // 01 — aperture blades open
+    play('iris', 1.3);
     await animate(0.02, 0.32, 1300, v => setAperture(svg, v), t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
     if (cancelled) return;
     // 02 — zoom through the aperture
-    lens.classList.add('is-zooming');
+    lens.classList.add('is-zooming'); play('whoosh');
     await animate(0.32, 1.25, 1250, v => setAperture(svg, v));
     if (cancelled) return;
     white.classList.add('is-through');
@@ -102,6 +104,7 @@ export async function render() {
   photo.addEventListener('click', async () => {
     if (photo.disabled) return;
     photo.disabled = true;
+    play('shutter');
     store.set({ introSeen: true });
     // Slide fully out, then expand into the homepage
     photo.classList.add('is-out');

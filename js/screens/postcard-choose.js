@@ -2,6 +2,7 @@
 import { h, title, deco, icon, img, esc, logo, announce, reducedMotion } from '../ui.js';
 import { PHOTOS, POSTCARD_PHOTOS } from '../content.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 export async function render(_, { go }) {
   const list = POSTCARD_PHOTOS.map(id => PHOTOS.find(p => p.id === id));
@@ -21,14 +22,14 @@ export async function render(_, { go }) {
     ${deco('burst', 'burst', 'left:51%;top:3%;transform:rotate(-10deg)')}
     <p class="pill pchoose__count" aria-live="polite">${icon('image')} <span></span></p>
     <div class="pchoose__stage" role="radiogroup" aria-label="Photographs for your postcard">
-      ${list.map(p => `<button class="pchoose__ph polaroid" type="button" role="radio" data-id="${p.id}" aria-label="${esc(p.alt)}">
+      ${list.map(p => `<button class="pchoose__ph polaroid" type="button" data-sound="none" role="radio" data-id="${p.id}" aria-label="${esc(p.alt)}">
         <span class="ph">${img(p.img, '', 'loading="eager"')}</span><span class="pchoose__check" aria-hidden="true">${icon('check')}</span></button>`).join('')}
       <p class="pchoose__hint" aria-hidden="true">Tap a photo to select it</p>
     </div>
     <button class="icon-btn icon-btn--pink pchoose__arrow pchoose__arrow--l" type="button" aria-label="Select previous photograph">${icon('arrow-l')}</button>
     <button class="icon-btn icon-btn--pink pchoose__arrow pchoose__arrow--r" type="button" aria-label="Select next photograph">${icon('arrow-r')}</button>
     <a class="btn pchoose__back" href="${esc(back)}">${icon('arrow-l')} Back to website</a>
-    <a class="btn btn--primary btn--lg pchoose__go" href="#" aria-disabled="true">Continue ${icon('arrow-r')}</a>
+    <a class="btn btn--primary btn--lg pchoose__go" data-sound="shutter" href="#" aria-disabled="true">Continue ${icon('arrow-r')}</a>
     <div class="stripes stripes--bottom" aria-hidden="true"></div>
   </section>`);
 
@@ -55,7 +56,7 @@ export async function render(_, { go }) {
   }
   function choose(id, focus) {
     if (centre() !== id) { const k = order.indexOf(id); [order[2], order[k]] = [order[k], order[2]]; layout(true); }
-    sel = id; store.set({ postcardPhoto: id }); paint();
+    sel = id; store.set({ postcardPhoto: id }); paint(); play('focus');
     announce(`Selected: ${PHOTOS.find(p => p.id === id).alt}`);
     if (focus) btns[id].focus();
   }

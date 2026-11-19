@@ -2,6 +2,7 @@
 import { h, title, deco, icon, img, esc, logo, announce, reducedMotion, downloadBlob, loadImage, cssVar, trapFocus } from '../ui.js';
 import { ABOUT_TILES, PROFILE } from '../content.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 const FRAME = { pink: 'pink', yellow: 'yellow', hot: 'hot' };
 
@@ -51,7 +52,7 @@ export async function render(_, { go }) {
     const id = li.dataset.id, t = ABOUT_TILES.find(x => x.id === id);
     if (revealed.has(id)) return;
     revealed.add(id);
-    li.classList.add('is-revealed');
+    li.classList.add('is-revealed'); play('focus');
     li.querySelector('img').alt = `${t.title} photograph`;
     li.querySelector('.tile__media').setAttribute('aria-label', `${t.title} — revealed. ${t.note}`);
     store.set({ aboutRevealed: [...revealed] });
@@ -111,7 +112,7 @@ export async function render(_, { go }) {
     cv.addEventListener('pointermove', e => {
       if (!drawing && (e.buttons & 1) && !li.classList.contains('is-revealed')) { drawing = true; last = null; li.classList.add('is-scratching'); }
       if (!drawing) return;
-      scratch(...pos(e));
+      scratch(...pos(e)); play('scratch');
       if (++moves % 12 === 0 && cleared() > 0.55) finish();
     });
     const up = () => { if (!drawing) return; drawing = false; last = null; if (cleared() > 0.5) finish(); };
@@ -124,7 +125,7 @@ export async function render(_, { go }) {
       const steps = reducedMotion() ? 1 : 14;
       for (let k = 0; k <= steps; k++) {
         const row = k / steps;
-        last = null; scratch(-10, hgt * (row - 0.1)); scratch(w + 10, hgt * (row + 0.15));
+        last = null; scratch(-10, hgt * (row - 0.1)); scratch(w + 10, hgt * (row + 0.15)); play('scratch');
         if (steps > 1) await new Promise(r => setTimeout(r, 28));
       }
       finish();
@@ -138,6 +139,7 @@ export async function render(_, { go }) {
   updateCount();
 
   function celebrate() {
+    play('shutter'); setTimeout(() => play('chime'), 180);
     emojiRain();
     keepsake([...revealed]);
   }
@@ -235,7 +237,7 @@ async function keepsake(ids) {
       <p>Here’s a snapshot keepsake of what you discovered.</p>
       <div class="keepsake__preview"><span class="keepsake__loading">Developing…</span></div>
       <div class="keepsake__btns">
-        <button class="btn btn--primary" type="button" data-dl disabled>${icon('download')} Save snapshot</button>
+        <button class="btn btn--primary" type="button" data-dl data-sound="shutter" disabled>${icon('download')} Save snapshot</button>
         <a class="btn" href="#/about/profile" data-prof>View my profile ${icon('arrow-r')}</a>
         <button class="btn" type="button" data-close>Close</button>
       </div>

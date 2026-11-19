@@ -1,5 +1,6 @@
 // Screen 18 — Contact: rotary dial moves a pointer; the camera's screen shows the matching action.
-import { h, title, deco, icon, esc, logo, announce, reducedMotion, shutterSound } from '../ui.js';
+import { h, title, deco, icon, esc, logo, announce, reducedMotion } from '../ui.js';
+import { play } from '../sound.js';
 import { CONTACT } from '../content.js';
 import { store } from '../state.js';
 import { resumeInfo } from '../resume.js';
@@ -32,7 +33,7 @@ export async function render() {
           ${OPTS.map((o, k) => `<path class="cdial__seg" data-k="${k}" d="${quad(k)}" fill="var(--c-${k % 2 ? 'cream' : 'pink'})" stroke="var(--c-ink)" stroke-width="1.2"/>`).join('')}
           <circle cx="50" cy="50" r="16" fill="var(--c-yellow)" stroke="var(--c-ink)" stroke-width="1.6"/>
         </svg>
-        ${OPTS.map((o, k) => { const [x, y] = P(32, k * 90); return `<button class="cdial__opt" role="radio" type="button" data-k="${k}" style="left:${x}%;top:${y}%">${icon(o.icon)}<b>${esc(o.label)}</b></button>`; }).join('')}
+        ${OPTS.map((o, k) => { const [x, y] = P(32, k * 90); return `<button class="cdial__opt" role="radio" type="button" data-sound="none" data-k="${k}" style="left:${x}%;top:${y}%">${icon(o.icon)}<b>${esc(o.label)}</b></button>`; }).join('')}
       </div>
       <div class="cdial__ring" aria-hidden="true"><span class="cdial__pointer"></span></div>
     </div>
@@ -72,7 +73,7 @@ export async function render() {
       ${icon(o.icon, 'ccam__icon')}
       <h2>${esc(o.head)}</h2>
       <p class="${o.id === 'email' ? 'ccam__email' : ''}">${esc(o.line)}</p>
-      <a class="btn btn--case ccam__cta" href="${esc(href)}"${dl}${ext}>${esc(label)} ${icon('arrow-r')}${o.ext ? '<span class="sr-only"> (opens in a new tab)</span>' : ''}</a>
+      <a class="btn btn--case ccam__cta" data-sound="shutter" href="${esc(href)}"${dl}${ext}>${esc(label)} ${icon('arrow-r')}${o.ext ? '<span class="sr-only"> (opens in a new tab)</span>' : ''}</a>
     </div>`;
   }
   function select(n, { sound = true, focus = false } = {}) {
@@ -80,13 +81,14 @@ export async function render() {
     i = (n + OPTS.length) % OPTS.length;
     let d = (i * 90 - ringRot) % 360; if (d > 180) d -= 360; if (d < -180) d += 360;
     ringRot += d;
+    for (let k = 0; k < Math.round(Math.abs(d) / 90); k++) setTimeout(() => play('tick'), k * 80);
     ring.style.transition = reducedMotion() ? 'none' : '';
     ring.style.transform = `rotate(${ringRot}deg)`;
     opts.forEach((b, k) => { b.setAttribute('aria-checked', k === i); b.tabIndex = k === i ? 0 : -1; b.classList.toggle('is-on', k === i); });
     el.querySelectorAll('.cdial__seg').forEach((s, k) => s.setAttribute('stroke-width', k === i ? 3 : 1.2));
     store.set({ contactIndex: i });
     if (prev !== i || !screen.innerHTML) {
-      if (sound && prev !== i) shutterSound();
+      if (sound && prev !== i) setTimeout(() => play('charge'), 120);
       flash.classList.remove('is-on'); void flash.offsetWidth; flash.classList.add('is-on');
       paintScreen();
       if (prev !== i) announce(`${OPTS[i].label}: ${OPTS[i].head}`);
@@ -110,7 +112,7 @@ export async function render() {
     let d = (a - ringRot) % 360; if (d > 180) d -= 360; if (d < -180) d += 360;
     ringRot += d; ring.style.transition = 'none'; ring.style.transform = `rotate(${ringRot}deg)`;
     const k = Math.round(((ringRot % 360) + 360) % 360 / 90) % 4;
-    if (k !== i) { i = k; paintScreen(); opts.forEach((b, j) => b.classList.toggle('is-on', j === k)); }
+    if (k !== i) { i = k; play('tick'); paintScreen(); opts.forEach((b, j) => b.classList.toggle('is-on', j === k)); }
   });
   const end = () => { if (!dragging) return; dragging = false; if (dragged) { ring.style.transition = ''; const k = i; i = -1; select(k); setTimeout(() => (dragged = false), 0); } };
   face.addEventListener('pointerup', end); face.addEventListener('pointercancel', end);

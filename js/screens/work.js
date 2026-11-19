@@ -2,6 +2,7 @@
 import { h, title, deco, icon, img, esc, logo, wait, reducedMotion, announce } from '../ui.js';
 import { PROJECTS } from '../content.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 export const rope = (cls = '') => `<svg class="rope ${cls}" viewBox="0 0 1000 60" preserveAspectRatio="none" aria-hidden="true">
   <defs><pattern id="twist" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><rect width="22" height="22" fill="var(--c-yellow)"/><rect width="5" height="22" fill="var(--c-ink)" opacity=".9"/></pattern></defs>
@@ -12,7 +13,7 @@ export const clip = c => `<span class="peg peg--${c}" aria-hidden="true"><i></i>
 
 const card = (p, i) => `
   <li class="line__item" style="--tilt:${p.tilt}deg;--sag:${Math.sin((i % 5) / 4 * Math.PI) * 1.6}vw">
-    <button class="hang" type="button" data-id="${p.id}" aria-label="${esc(`${p.id}. ${p.title} — ${p.category}. Open project`)}">
+    <button class="hang" type="button" data-sound="none" data-id="${p.id}" aria-label="${esc(`${p.id}. ${p.title} — ${p.category}. Open project`)}">
       ${clip(p.clip)}
       <span class="polaroid hang__card">
         <span class="ph">${img(p.img, '')}</span>
@@ -39,8 +40,8 @@ export async function render(_, { go }) {
       <div class="line line--1">${rope()}<ul class="line__items">${PROJECTS.slice(0, 5).map(card).join('')}</ul></div>
       <div class="line line--2">${rope()}<ul class="line__items">${PROJECTS.slice(5).map((p, i) => card(p, i)).join('')}</ul></div>
     </div>
-    <button class="icon-btn icon-btn--yellow work__arrow work__arrow--l" type="button" aria-label="Previous project">${icon('arrow-l')}</button>
-    <button class="icon-btn icon-btn--yellow work__arrow work__arrow--r" type="button" aria-label="Next project">${icon('arrow-r')}</button>
+    <button class="icon-btn icon-btn--yellow work__arrow work__arrow--l" type="button" data-sound="tick" aria-label="Previous project">${icon('arrow-l')}</button>
+    <button class="icon-btn icon-btn--yellow work__arrow work__arrow--r" type="button" data-sound="tick" aria-label="Next project">${icon('arrow-r')}</button>
     ${deco('deco-cursor work__cursor', 'cursor', '')}
     <div class="stripes stripes--bottom" aria-hidden="true"></div>
   </section>`);
@@ -81,7 +82,7 @@ export async function render(_, { go }) {
     announce(`Project ${p.id} unclipped`);
     if (reducedMotion()) return go(`#/work/${p.id}`);
     // 07a — the peg opens and releases the photo
-    b.classList.add('is-unclipping');
+    b.classList.add('is-unclipping'); play('snap');
     await wait(380);
     // 07b — photo swings off the line and flies to the foreground
     const cardEl = b.querySelector('.hang__card');
@@ -100,13 +101,14 @@ export async function render(_, { go }) {
     Object.assign(fly.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px' });
     document.body.append(stage, fly);
     cardEl.style.visibility = 'hidden';
+    play('whoosh');
     const W = Math.min(innerWidth * 0.42, innerHeight * 0.78), L = (innerWidth - W) / 2, T = innerHeight * 0.16;
     await fly.animate([
       { transform: `rotate(${p.tilt}deg)`, offset: 0 },
       { transform: `translateY(40px) rotate(${p.tilt + 10}deg)`, offset: .25 },
       { left: L + 'px', top: T + 'px', width: W + 'px', transform: 'rotate(8deg)' },
     ], { duration: 900, easing: 'cubic-bezier(.55,0,.25,1)', fill: 'forwards' }).finished;
-    stage.classList.add('is-on');
+    stage.classList.add('is-on'); play('shutter');
     await wait(900);
     go(`#/work/${p.id}`);
     setTimeout(() => { stage.remove(); fly.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).finished.then(() => fly.remove()); }, 120);

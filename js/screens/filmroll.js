@@ -2,6 +2,7 @@
 import { h, title, deco, icon, img, esc, logo, announce, trapFocus, reducedMotion } from '../ui.js';
 import { PHOTOS, MEMORY_LABEL } from '../content.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 export async function render({ photo }, { go }) {
   let i = Math.max(0, PHOTOS.findIndex(p => p.id === photo));
@@ -18,12 +19,12 @@ export async function render({ photo }, { go }) {
     <div class="film" role="region" aria-roledescription="film roll" aria-label="${esc(MEMORY_LABEL)} — ${PHOTOS.length} frames">
       ${holes(40)}
       <ol class="film__track">${PHOTOS.map((p, k) => `
-        <li class="film__cell"><button class="film__frame" type="button" data-k="${k}" aria-label="Frame ${String(k + 1).padStart(2, '0')}: ${esc(p.alt)}">
+        <li class="film__cell"><button class="film__frame" type="button" data-sound="none" data-k="${k}" aria-label="Frame ${String(k + 1).padStart(2, '0')}: ${esc(p.alt)}">
           <span class="film__num" aria-hidden="true">${String(k + 1).padStart(2, '0')} ▶</span>
           ${img(p.img, '')}</button></li>`).join('')}</ol>
       ${holes(40)}
-      <button class="icon-btn film__nav film__nav--l" type="button" aria-label="Previous frame">${icon('chev-l')}</button>
-      <button class="icon-btn film__nav film__nav--r" type="button" aria-label="Next frame">${icon('chev-r')}</button>
+      <button class="icon-btn film__nav film__nav--l" type="button" data-sound="none" aria-label="Previous frame">${icon('chev-l')}</button>
+      <button class="icon-btn film__nav film__nav--r" type="button" data-sound="none" aria-label="Next frame">${icon('chev-r')}</button>
     </div>
     <p class="filmroll__caption sr-only"></p>
     <a class="btn btn--sm filmroll__back" href="#/archive">${icon('arrow-l')} Back to gallery</a>
@@ -36,6 +37,7 @@ export async function render({ photo }, { go }) {
   const cap = el.querySelector('.filmroll__caption');
 
   function show(n, announceIt = true) {
+    if (announceIt) play('wind');
     i = (n + PHOTOS.length) % PHOTOS.length;
     frames.forEach((f, k) => { f.classList.toggle('is-active', k === i); f.setAttribute('aria-current', k === i); });
     const f = frames[i];
@@ -62,6 +64,7 @@ export async function render({ photo }, { go }) {
   track.addEventListener('pointerup', e => { if (sx !== null && Math.abs(e.clientX - sx) > 50) show(i + (e.clientX < sx ? 1 : -1)); sx = null; });
 
   function lightbox() {
+    play('shutter');
     const p = PHOTOS[i];
     const box = h(`<div class="modal-backdrop lightbox" role="dialog" aria-modal="true" aria-label="Frame ${i + 1}: ${esc(p.alt)}">
       <figure class="lightbox__fig polaroid">${img(p.img, p.alt, 'loading="eager"')}<figcaption><b>${String(i + 1).padStart(2, '0')}</b> · ${esc(MEMORY_LABEL)}</figcaption></figure>

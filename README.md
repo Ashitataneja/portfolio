@@ -29,12 +29,15 @@ Then open http://localhost:8080. To deploy, upload the folder as-is to Netlify, 
 | 16 | `#/about` | image 75 | Scratch tiles (mouse/touch/pen, or Enter/Space). All revealed → emoji rain + downloadable keepsake. |
 | 17 | `#/about/profile` | image 76 | Section nav, Download Resume. |
 | 18 | `#/contact` | image 77 | 4-way dial moves the pointer; the camera's screen shows the matching action. |
-| 19 | overlay | image 78 | Exit intent (cursor leaves through the top) after 3+ screens, once per session. Mobile: "Postcard" button. |
+| 19 | overlay | image 78 | Appears when the cursor crosses (or is flung toward) the top edge, when the visitor comes back from another tab, or at the 4th screen change. "Maybe later" snoozes it for 6 screens (max twice a session); "Close" stops it. Mobile: "Postcard" button. |
 | 20–21 | `#/postcard`, `#/postcard/:photo` | image 79, 80/81/83 | Pick a photo (Continue disabled until chosen) → postcard drawn on canvas → 3600×2250 PNG download (artwork only). |
 
-## Colour-vision control (bottom of every screen)
+## Accessibility (icon at the top-right of every screen)
 
-- **One control for the whole site**, mounted once and persisted in `localStorage`.
+One shared panel, persisted in `localStorage`: **Colour vision**, **Brightness** (60–120%), **Text size** (90–150%, scales every font size via `--text-scale`), **Readable font** (Atkinson Hyperlegible + wider spacing), **High contrast**, **Reduce motion**, **Sounds** and **Reset all**.
+
+### Colour vision
+
 - Pick a type (Protanopia, Deuteranopia or Tritanopia), then slide from **Original** → **Colour-friendly**. **Reset** returns to 0%.
 - **0% is exactly your design's colours** (sampled from the screens). The friendly end is the *smallest* change to your accent colours that makes them distinguishable for that vision type. Background, grid, cream surfaces and ink never change.
 - Implemented as colour tokens (`--c-*` CSS variables) blended in linear light by `js/theme.js`. No page filter. Photographs are never altered.
@@ -45,6 +48,10 @@ cd portfolio/dev && node run-check.mjs
 ```
 
 - Colour is never the only signal. Selected dial segments get a hatch pattern, an underline and an "Open" chip; selected photos get a ✓ badge; clips have distinct shapes; stages show ✓ when done.
+
+## Sound
+
+`js/sound.js` synthesises camera sounds with Web Audio (no audio files): shutter (dial opens, case-study shutter, captures), ratchet ticks (dial detents, sliders), film-advance wind (film roll, case-study previous), instant-camera print motor (intro, postcard), autofocus beep (reveals, selections), flash-charge whine (contact screen), paper swoosh (journal), peg snap (unclipping), scratch, and a soft click on every other button. Toggle under Accessibility → Sounds.
 
 ## Content to fill in — `js/content.js`
 

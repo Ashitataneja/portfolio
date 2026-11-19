@@ -2,6 +2,7 @@
 import { h, icon, esc, makeDial, announce, reducedMotion } from './ui.js';
 import { NAV } from './content.js';
 import { store } from './state.js';
+import { play } from './sound.js';
 
 const P = (r, a) => [r * Math.sin(a * Math.PI / 180), -r * Math.cos(a * Math.PI / 180)];
 function sector(i, n, rIn, rOut) {
@@ -18,8 +19,8 @@ export function navDial({ variant = 'home', onOpen }) {
   const n = NAV.length, rIn = variant === 'home' ? 50 : 40, rOut = 92;
   const el = h(`<div class="dial dial--${variant}">
     <div class="dial__pointer" aria-hidden="true"></div>
-    <button class="dial__spin dial__spin--prev" type="button" aria-label="Rotate dial anticlockwise"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M52 14C40 4 22 6 12 20" fill="none" stroke="var(--c-ink)" stroke-width="11" stroke-linecap="round"/><path d="M52 14C40 4 22 6 12 20" fill="none" stroke="var(--c-paper)" stroke-width="6" stroke-linecap="round"/><path d="M4 12l6 18 16-8z" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="3" stroke-linejoin="round"/></svg></button>
-    <button class="dial__spin dial__spin--next" type="button" aria-label="Rotate dial clockwise"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M50 8c6 14 2 32-10 42" fill="none" stroke="var(--c-ink)" stroke-width="11" stroke-linecap="round"/><path d="M50 8c6 14 2 32-10 42" fill="none" stroke="var(--c-paper)" stroke-width="6" stroke-linecap="round"/><path d="M30 56l18-4-6-16z" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="3" stroke-linejoin="round"/></svg></button>
+    <button class="dial__spin dial__spin--prev" type="button" data-sound="none" aria-label="Rotate dial anticlockwise"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M52 14C40 4 22 6 12 20" fill="none" stroke="var(--c-ink)" stroke-width="11" stroke-linecap="round"/><path d="M52 14C40 4 22 6 12 20" fill="none" stroke="var(--c-paper)" stroke-width="6" stroke-linecap="round"/><path d="M4 12l6 18 16-8z" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="3" stroke-linejoin="round"/></svg></button>
+    <button class="dial__spin dial__spin--next" type="button" data-sound="none" aria-label="Rotate dial clockwise"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M50 8c6 14 2 32-10 42" fill="none" stroke="var(--c-ink)" stroke-width="11" stroke-linecap="round"/><path d="M50 8c6 14 2 32-10 42" fill="none" stroke="var(--c-paper)" stroke-width="6" stroke-linecap="round"/><path d="M30 56l18-4-6-16z" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="3" stroke-linejoin="round"/></svg></button>
     <div class="dial__wheel" role="group" aria-roledescription="rotary dial" aria-label="Navigation dial. Use arrow keys to rotate, Enter to open.">
       <svg class="dial__svg" viewBox="-100 -100 200 200" aria-hidden="true">
         <defs><pattern id="hatch-${variant}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="var(--c-yellow)"/><rect width="2" height="7" fill="color-mix(in srgb, var(--c-ink) 12%, transparent)"/></pattern></defs>
@@ -30,13 +31,13 @@ export function navDial({ variant = 'home', onOpen }) {
       </svg>
       ${NAV.map((d, i) => {
         const [x, y] = P((rIn + rOut) / 2 + 2, i * 72);
-        return `<button class="dial__label" type="button" data-i="${i}" style="left:${50 + x / 2}%;top:${50 + y / 2}%" aria-label="${esc(d.label)}">
+        return `<button class="dial__label" type="button" data-sound="none" data-i="${i}" style="left:${50 + x / 2}%;top:${50 + y / 2}%" aria-label="${esc(d.label)}">
           <span class="dial__label-in">${icon(variant === 'home' ? d.icon : d.icon2)}<b>${esc(d.label)}</b><small class="dial__go" aria-hidden="true">Open ${icon('arrow-r')}</small></span></button>`;
       }).join('')}
     </div>
     ${variant === 'home'
       ? `<div class="dial__center dial__center--portrait"><img src="assets/img/portrait_home.jpg" alt="Portrait of Ashita Taneja smiling" decoding="async"></div>`
-      : `<button class="dial__center dial__center--lens" type="button" aria-label="Open selected destination"><span></span></button>`}
+      : `<button class="dial__center dial__center--lens" type="button" data-sound="none" aria-label="Open selected destination"><span></span></button>`}
   </div>`);
 
   const wheel = el.querySelector('.dial__wheel');
@@ -64,7 +65,7 @@ export function navDial({ variant = 'home', onOpen }) {
   });
   highlight(dial.index);
 
-  const open = i => { store.set({ homeIndex: i }); onOpen(NAV[i]); };
+  const open = i => { store.set({ homeIndex: i }); play('shutter'); onOpen(NAV[i]); };
   labels.forEach(b => b.addEventListener('click', () => {
     if (dial.wasDrag()) return;
     const i = +b.dataset.i;

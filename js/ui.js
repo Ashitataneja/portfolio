@@ -41,21 +41,9 @@ export function toast(msg, ms = 2600) {
   setTimeout(() => t.remove(), ms);
 }
 
-/* ---------- Sound: a short synthesised shutter click (no audio files) ---------- */
-let ctx;
-export function shutterSound() {
-  try {
-    ctx ||= new (window.AudioContext || window.webkitAudioContext)();
-    const len = 0.09, buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) {
-      const t = i / ctx.sampleRate;
-      d[i] = (Math.random() * 2 - 1) * Math.exp(-t * 60) * (t < 0.012 || (t > 0.045 && t < 0.06) ? 1 : 0.25);
-    }
-    const src = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter();
-    f.type = 'highpass'; f.frequency.value = 1200; g.gain.value = 0.22;
-    src.buffer = buf; src.connect(f).connect(g).connect(ctx.destination); src.start();
-  } catch { /* audio unavailable */ }
-}
+/* ---------- Sound ---------- */
+import { play } from './sound.js';
+export function shutterSound() { play('shutter'); }
 
 /* ---------- Aperture (SVG) — used by the intro, shutter transitions ---------- */
 // Blades are rectangles whose inner edges are tangent to a circle of radius `d`.
@@ -127,6 +115,8 @@ export function makeDial(el, { count, index = 0, onChange, onActivate, pointerAn
     let delta = ((-target * step + pointerAngle) - rot) % 360;
     if (delta > 180) delta -= 360; if (delta < -180) delta += 360;
     rot += delta; cur = target; apply(true);
+    const n = Math.round(Math.abs(delta) / step);
+    for (let k = 0; k < n; k++) setTimeout(() => play('tick'), k * 75);
     if (!silent) onChange?.(cur);
   }
   const center = () => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
@@ -142,7 +132,7 @@ export function makeDial(el, { count, index = 0, onChange, onActivate, pointerAn
     if (!dragging) return;
     rot = startRot + d; apply(false);
     const live = norm(Math.round((pointerAngle - rot) / step));
-    if (live !== cur) { cur = live; onChange?.(cur, true); }
+    if (live !== cur) { cur = live; play('tick'); onChange?.(cur, true); }
   });
   const end = () => {
     if (!down) return;

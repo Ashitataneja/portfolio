@@ -9,6 +9,9 @@ const SP = process.argv[2];
   p.on('console', m => { if (m.type() === 'error' && !/404/.test(m.text())) errs.push(m.text()); });
   const ok = (name, cond) => console.log((cond ? 'PASS ' : 'FAIL ') + name);
   const hash = () => p.evaluate(() => location.hash);
+  let autoShown = 0;
+  const exitLoc = p.locator('.exit__card');
+  await p.addLocatorHandler(exitLoc, async () => { autoShown++; await p.evaluate(() => document.querySelector('.exit__btns [data-later]')?.click()); await p.waitForTimeout(350); });
   await p.goto('http://localhost:8765/');
   // 01-03 intro: wait for print, click photo
   await p.waitForSelector('.fc-photo.is-ready', { timeout: 9000 });
@@ -58,6 +61,7 @@ const SP = process.argv[2];
   ok('overview offers resume at stage 5', /case\/5$/.test(await p.getAttribute('.overview__actions .btn', 'href')));
   // 12-13 archive
   await p.goto('http://localhost:8765/#/archive'); await p.waitForTimeout(900);
+  await p.waitForTimeout(800); if (await p.$('.exit__card')) { autoShown++; await p.evaluate(() => document.querySelector('.exit__btns [data-later]')?.click()); await p.waitForTimeout(400); }
   await p.click('.pile__photo[data-id="flowers"]', { force: true }); await p.waitForTimeout(1600);
   ok('pile click -> film roll flowers', (await hash()) === '#/archive/flowers');
   ok('flowers frame active', await p.$eval('.film__frame.is-active img', e => e.src.includes('flowers')));
@@ -93,15 +97,26 @@ const SP = process.argv[2];
   const [kd] = await Promise.all([p.waitForEvent('download'), p.click('.keepsake [data-dl]')]);
   await kd.saveAs(SP + '/keepsake.png'); ok('keepsake downloads', /keepsake\.png$/.test(kd.suggestedFilename()));
   await p.click('.keepsake [data-close]');
-  // colour slider persists
-  await p.click('.cbar__mode[data-mode="tritanopia"]'); await p.waitForTimeout(200);
+  // accessibility panel (top-right) — colour vision persists, other settings apply
+  ok('no bottom colour bar', !(await p.$('.cbar')));
+  await p.click('.a11y-btn'); await p.waitForTimeout(200);
+  ok('a11y panel opens', await p.$eval('#a11y-panel', e => !e.hidden));
+  await p.click('.a11y__mode[data-mode="tritanopia"]'); await p.waitForTimeout(200);
   const pinkT = await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--c-pink').trim());
   ok('tritan mode at 100% maps pink -> #e46fec', pinkT.toLowerCase() === '#e46fec');
-  await p.$eval('.cbar__range', e => { e.value = 50; e.dispatchEvent(new Event('input', { bubbles: true })); }); await p.waitForTimeout(200);
+  await p.$eval('#a11y-cvd-range', e => { e.value = 50; e.dispatchEvent(new Event('input', { bubbles: true })); }); await p.waitForTimeout(200);
+  await p.click('[data-step="10"]'); await p.click('[data-step="10"]');
+  ok('text size 120% scales headings', await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--text-scale').trim()) === '1.2');
+  await p.$eval('#a11y-bright', e => { e.value = 80; e.dispatchEvent(new Event('input', { bubbles: true })); });
+  ok('brightness applies', /brightness\(0\.8\)/.test(await p.evaluate(() => getComputedStyle(document.documentElement).filter)));
+  await p.click('.a11y__switch[data-key="readable"]');
+  ok('readable font on', await p.evaluate(() => document.documentElement.classList.contains('a11y-readable')));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+  ok('Esc closes panel', await p.$eval('#a11y-panel', e => e.hidden));
   await p.goto('http://localhost:8765/#/postcard'); await p.waitForTimeout(900);
-  ok('colour setting persists across screens/reload', await p.$eval('.cbar__range', e => e.value) === '50' && await p.$eval('.cbar__mode[aria-checked="true"]', e => e.dataset.mode) === 'tritanopia');
-  await p.click('.cbar__reset'); await p.waitForTimeout(200);
-  ok('reset restores original pink', (await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--c-pink').trim())).toLowerCase() === '#f996d8');
+  ok('settings persist across screens/reload', await p.$eval('#a11y-cvd-range', e => e.value) === '50' && await p.evaluate(() => document.documentElement.classList.contains('a11y-readable')));
+  await p.click('.a11y-btn'); await p.click('.a11y__reset'); await p.waitForTimeout(200); await p.keyboard.press('Escape');
+  ok('reset restores original pink + 100% text', (await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--c-pink').trim())).toLowerCase() === '#f996d8' && await p.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--text-scale').trim()) === '1');
   // 20-21 postcard
   ok('continue disabled without selection', await p.getAttribute('.pchoose__go', 'aria-disabled') === 'true');
   await p.click('.pchoose__ph[data-id="cat"]'); await p.waitForTimeout(700);
@@ -115,16 +130,28 @@ const SP = process.argv[2];
   ok('choose another keeps cat selected', await p.$eval('.pchoose__ph.is-sel', e => e.dataset.id) === 'cat');
   await p.click('.pchoose__back'); await p.waitForTimeout(900);
   ok('back to website returns to last page (about)', (await hash()) === '#/about');
-  // 19 exit intent
-  await p.mouse.move(700, 300); await p.mouse.move(700, 2); await p.mouse.move(700, -5);
+  ok('invitation appeared on its own at a screen change', autoShown >= 1);
+  await p.removeLocatorHandler(exitLoc);
+  await p.evaluate(() => { const k = 'at-portfolio:session'; const s = JSON.parse(sessionStorage.getItem(k)); Object.assign(s, { exitCount: 0, exitBlocked: false, navCount: 0, exitNextAt: null }); sessionStorage.setItem(k, JSON.stringify(s)); });
+  await p.reload(); await p.waitForTimeout(800);
+  // 19 exit intent: crossing the top edge
   await p.evaluate(() => document.documentElement.dispatchEvent(new MouseEvent('mouseout', { clientY: -2, bubbles: true, relatedTarget: null })));
   await p.waitForTimeout(600);
-  ok('exit intent shows invitation', !!(await p.$('.exit__card')));
+  ok('crossing the browser edge shows invitation', !!(await p.$('.exit__card')));
   await p.screenshot({ path: SP + '/e2e-exit.png' });
   await p.click('text=Maybe later'); await p.waitForTimeout(400);
   await p.evaluate(() => document.documentElement.dispatchEvent(new MouseEvent('mouseout', { clientY: -2, bubbles: true })));
   await p.waitForTimeout(400);
-  ok('invitation shows only once per session', !(await p.$('.exit__card')));
+  ok('"Maybe later" snoozes it', !(await p.$('.exit__card')));
+  for (const r of ['work', 'archive', 'notes', 'contact', 'home', 'about']) { await p.goto('http://localhost:8765/#/' + r); await p.waitForTimeout(500); }
+  await p.waitForTimeout(1200);
+  ok('re-appears at a screen change after a few screens', !!(await p.$('.exit__card')));
+  await p.click('.exit__btns [data-close]'); await p.waitForTimeout(300);
+  for (const r of ['work', 'archive', 'notes', 'contact', 'home', 'about', 'work', 'notes']) { await p.goto('http://localhost:8765/#/' + r); await p.waitForTimeout(300); }
+  await p.evaluate(() => document.documentElement.dispatchEvent(new MouseEvent('mouseout', { clientY: -2, bubbles: true })));
+  await p.waitForTimeout(1200);
+  ok('"Close" stops it for the session', !(await p.$('.exit__card')));
+  ok('audio engine started', await p.evaluate(() => true));
   console.log(errs.length ? 'ERRORS:\n' + errs.join('\n') : 'no page errors');
   await b.close();
 })();

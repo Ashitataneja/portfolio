@@ -2,6 +2,7 @@
 import { h, title, deco, icon, img, esc, logo, reducedMotion, announce } from '../ui.js';
 import { PHOTOS } from '../content.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 // Pile layout echoes the design: [left%, top%, width%, rotation, z]
 const PILE = {
@@ -23,7 +24,7 @@ export async function render(_, { go }) {
     <ul class="pile" aria-label="Photographs — choose one to open its memory">
       ${PHOTOS.map((p, i) => { const [l, t, w, r, z] = PILE[p.id]; return `
         <li class="pile__item" style="left:${l}%;top:${t}%;width:${w}%;--r:${r}deg;z-index:${z}">
-          <button class="pile__photo polaroid${p.id === last ? ' is-last' : ''}" type="button" data-id="${p.id}" aria-label="Open memory: ${esc(p.alt)}">
+          <button data-sound="none" class="pile__photo polaroid${p.id === last ? ' is-last' : ''}" type="button" data-id="${p.id}" aria-label="Open memory: ${esc(p.alt)}">
             <span class="ph">${img(p.img, '', i > 3 ? '' : 'loading="eager"')}</span>
           </button>
         </li>`; }).join('')}
@@ -46,7 +47,7 @@ export async function render(_, { go }) {
     if (reducedMotion()) return go(`#/archive/${id}`);
     const li = b.parentElement;
     el.querySelector('.pile').classList.add('is-lifting');
-    li.classList.add('is-lifted');
+    li.classList.add('is-lifted'); play('whoosh');
     await new Promise(r => setTimeout(r, 420));
     // expand toward the viewing area of the film roll
     const r = b.getBoundingClientRect();
@@ -60,6 +61,7 @@ export async function render(_, { go }) {
       { transform: `rotate(${li.style.getPropertyValue('--r')})` },
       { left: (innerWidth - W) / 2 + 'px', top: innerHeight * .38 + 'px', width: W + 'px', height: H + 'px', transform: 'rotate(-3deg)' },
     ], { duration: 560, easing: 'cubic-bezier(.6,0,.25,1)', fill: 'forwards' }).finished;
+    play('shutter');
     go(`#/archive/${id}`);
     setTimeout(() => fly.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 320, fill: 'forwards' }).finished.then(() => fly.remove()), 200);
   }));

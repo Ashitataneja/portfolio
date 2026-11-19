@@ -3,6 +3,7 @@ import { h, icon, esc, logo, loadImage, cssVar, downloadBlob, announce, toast } 
 import { PHOTOS } from '../content.js';
 import { store } from '../state.js';
 import { stickerText, roundRect } from './about.js';
+import { play } from '../sound.js';
 
 export async function drawPostcard(photoId, scale = 1) {
   await document.fonts.ready;
@@ -81,14 +82,15 @@ export async function render({ photo }, { go }) {
       <span class="ppreview__img"><span class="ppreview__loading">Printing your postcard…</span></span></figure>
     <div class="ppreview__btns">
       <a class="btn btn--lg" href="${esc(back)}">${icon('arrow-l')} Back to website</a>
-      <button class="btn btn--primary btn--lg" type="button" data-dl disabled>${icon('download')} Download postcard</button>
+      <button class="btn btn--primary btn--lg" type="button" data-dl data-sound="shutter" disabled>${icon('download')} Download postcard</button>
       <a class="btn btn--lg" href="#/postcard">${icon('refresh')} Choose another photo</a>
     </div>
     <div class="stripes stripes--bottom" aria-hidden="true"></div>
   </section>`);
   const dl = el.querySelector('[data-dl]');
   let current = null;
-  async function paint() {
+  async function paint(first) {
+    if (first === true) play('print', 1.1);
     const c = await drawPostcard(p.id, 0.5);
     const im = new Image();
     im.src = c.toDataURL('image/jpeg', 0.9);
@@ -97,11 +99,11 @@ export async function render({ photo }, { go }) {
     dl.disabled = false;
   }
   dl.addEventListener('click', async () => {
-    dl.disabled = true; dl.lastChild.textContent = ' Preparing…';
+    dl.disabled = true; dl.lastChild.textContent = ' Preparing…'; setTimeout(() => play('print', 1.2), 150);
     const c = await drawPostcard(p.id, 1.5);              // 3600 × 2250 px
-    c.toBlob(b => { downloadBlob(b, `ashita-taneja-postcard-${p.id}.png`); dl.disabled = false; dl.lastChild.textContent = ' Download postcard'; toast('Postcard saved — thank you for visiting!'); announce('Postcard downloaded'); }, 'image/png');
+    c.toBlob(b => { downloadBlob(b, `ashita-taneja-postcard-${p.id}.png`); dl.disabled = false; dl.lastChild.textContent = ' Download postcard'; toast('Postcard saved — thank you for visiting!'); play('chime'); announce('Postcard downloaded'); }, 'image/png');
   });
   const onTok = () => { clearTimeout(current); current = setTimeout(paint, 120); };
   addEventListener('tokens-changed', onTok);
-  return { el, title: 'Your postcard', mounted: paint, destroy: () => removeEventListener('tokens-changed', onTok) };
+  return { el, title: 'Your postcard', mounted: () => paint(true), destroy: () => removeEventListener('tokens-changed', onTok) };
 }

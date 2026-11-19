@@ -5,6 +5,9 @@ const SESSION_KEY = 'at-portfolio:session';
 
 const defaults = {
   colour: { mode: 'deuteranopia', amount: 0 },
+  a11y: null,            // accessibility preferences (see theme.js A11Y_DEFAULTS)
+  exitCount: 0,          // times the postcard invitation has been shown
+  navCount: 0,           // screen changes this session
   introSeen: false,
   homeIndex: 0,          // dial position on home / navigate
   contactIndex: 0,       // contact dial position
@@ -20,7 +23,7 @@ const defaults = {
   exitShown: false,
   startedAt: Date.now(),
 };
-const LOCAL_FIELDS = ['colour'];
+const LOCAL_FIELDS = ['colour', 'a11y'];
 
 function read(storage, key) {
   try { return JSON.parse(storage.getItem(key) || '{}'); } catch { return {}; }

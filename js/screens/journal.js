@@ -2,6 +2,7 @@
 import { h, title, deco, icon, img, esc, logo, reducedMotion, announce, wait } from '../ui.js';
 import { ARTICLES } from '../content.js';
 import { store } from '../state.js';
+import { play } from '../sound.js';
 
 export const bookTabs = () => `<span class="book__tabs" aria-hidden="true"><i></i><i></i><i></i></span>`;
 
@@ -17,7 +18,7 @@ export async function render(_, { go }) {
     ${deco('burst', 'burst', 'left:44%;top:2%;transform:rotate(-10deg)')}
     <p class="note journal__note">Read. Explore. Repeat.</p>
     <div class="book ${open ? 'is-open' : ''}">
-      <button class="book__cover" type="button" aria-expanded="${open}" aria-controls="journal-entries">
+      <button class="book__cover" type="button" data-sound="none" aria-expanded="${open}" aria-controls="journal-entries">
         <span class="book__pages" aria-hidden="true"></span>
         <span class="book__face">
           <span class="book__star" aria-hidden="true">★</span>
@@ -34,7 +35,7 @@ export async function render(_, { go }) {
         <div class="book__page">
           <h2 class="sr-only">Entries</h2>
           <ul class="entries">${ARTICLES.map(a => `
-            <li><a class="entry${a.slug === st.journalLast ? ' is-last' : ''}" href="#/notes/${a.slug}" data-slug="${a.slug}">
+            <li><a data-sound="none" class="entry${a.slug === st.journalLast ? ' is-last' : ''}" href="#/notes/${a.slug}" data-slug="${a.slug}">
               <span class="entry__img">${img(a.img, '')}</span>
               <span class="entry__txt"><b>${esc(a.title)}</b><span>${esc(a.subtitle)}</span><small>${esc(a.date)} • ${esc(a.read)}</small></span>
               <span class="entry__go" aria-hidden="true">${icon('chev-r')}</span>
@@ -53,6 +54,7 @@ export async function render(_, { go }) {
   const spread = el.querySelector('.book__spread');
   async function openBook() {
     if (book.classList.contains('is-open')) return;
+    play('page'); setTimeout(() => play('page'), 220);
     spread.hidden = false;
     void spread.offsetWidth;
     book.classList.add('is-open');
@@ -70,7 +72,7 @@ export async function render(_, { go }) {
     store.set({ journalLast: a.dataset.slug, journalScroll: scrollY, journalOpen: true });
     if (!reducedMotion()) {
       const page = el.querySelector('.book__page');
-      page.classList.add('is-turning');
+      page.classList.add('is-turning'); play('page');
       await wait(560);
     }
     go(a.getAttribute('href'));
