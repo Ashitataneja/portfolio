@@ -20,10 +20,10 @@ Then open http://localhost:8080. To deploy, upload the folder as-is to Netlify, 
 | 01–03 | `#/` | image 62, 63, 64 | Aperture opens → zoom through the lens → camera prints a photo. Waits for a click, then the photo slides out and expands into Home. |
 | 04 | `#/home` | image 65 | Rotary dial: drag, arrow keys, curved-arrow buttons, or click a label (it rotates under the pointer, then opens). |
 | 05 | `#/navigate` | image 66 | Opened from the camera sticker on Home. Same dial; the centre lens opens the selection. |
-| 06–07 | `#/work` | image 67, 68 | Clotheslines: hover/arrows highlight, click → peg opens, photo unclips and flies forward ("Project unclipped!"). |
-| 08 | `#/work/:id` | image 69 | Open case study / Back to work. |
-| 09 | `#/work/:id/overview` | — | Case-study intro (no design supplied; uses the same visual language). Remembers your stage. |
-| 10 | `#/work/:id/case/:n` | image 70 | 8-stage index, shutter (iris + click sound) → next, Previous, Evidence panel. Keys: ←/→, 1–8, E, Esc. |
+| 06–07 | `#/work` | image 67, 68 | One clothesline of 5 projects. Click → the peg's jaws open, the photo drops, flies forward and a new peg clips it to the line ("Project unclipped!"). |
+| 08 | `#/work/:id` | image 69 | Enter case study (goes straight to the stages; remembers your stage), the 8-stage list, Back to work at the top. |
+| 09 | `#/work/:id/overview` | — | Old link; forwards into the case study. |
+| 10 | `#/work/:id/case/:n` | image 70 | 8-stage index; Next blinks the small iris on the button (with the shutter sound), Previous. Keys: ←/→, 1–8. |
 | 12–13 | `#/archive`, `#/archive/:photo` | image 71, 72 | Photo pile → lift + expand → film roll; prev/next, swipe, click active frame for full view. |
 | 14–15 | `#/notes`, `#/notes/:slug` | image 73, 74 | Notebook opens; page-turn into articles; prev/next; back keeps position. |
 | 16 | `#/about` | image 75 | Scratch tiles (mouse/touch/pen, or Enter/Space). All revealed → emoji rain + downloadable keepsake. |
@@ -57,13 +57,14 @@ cd portfolio/dev && node run-check.mjs
 
 The designs use template copy in places, and the site keeps it rather than inventing details:
 
-- **Projects:** "Project Title", the short description and "Team details" (categories, role, duration and year come from the design).
+- **Projects:** five projects. "Project Title", the short description and "Team details" (categories, role, duration and year come from the design).
+- **Photos (`PHOTOS[].caption`):** the description shown when a photo is opened in the film roll. Edit these in your own words.
 - **Case study:** stage 01 (Context) is the real content from the design and is used for every project. Stages 02–08 have template text.
 - **Profile:** "Degree Name / Institution Name", "Organisation Name / Role Title".
 - **Journal:** only "Designing for Joy" has body text. The other four show title, subtitle, date, read time and image.
 - **`CONTACT.linkedin`:** empty, so the button opens a LinkedIn people search for your name.
 - **`CONTACT.email`:** `ashita.taneja@gmail.com`, as printed on the Contact screen design.
-- **Resume:** drop the PDF at `assets/Ashita-Taneja-Resume.pdf`. Until then, Resume buttons become "Request Resume" (an email).
+- **Resume:** drop the PDF at `assets/Ashita-Taneja-Resume.pdf`. Buttons always say "Download Resume"; until the PDF is there they open an email request instead of a broken link.
 
 ## Assets
 

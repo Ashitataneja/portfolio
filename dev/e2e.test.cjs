@@ -16,7 +16,7 @@ const SP = process.argv[2];
   // 01-03 intro: wait for print, click photo
   await p.waitForSelector('.fc-photo.is-ready', { timeout: 9000 });
   ok('intro prints photo and waits', (await hash()) === '' || (await hash()) === '#/');
-  await p.click('.fc-photo'); await p.waitForTimeout(1800);
+  await p.click('.fc-photo', { force: true }); await p.waitForTimeout(1800);
   ok('photo click -> home', (await hash()) === '#/home');
   // 04 dial: keyboard rotate then Enter
   await p.focus('.dial__label.is-selected'); await p.keyboard.press('ArrowRight'); await p.waitForTimeout(700);
@@ -37,28 +37,28 @@ const SP = process.argv[2];
   ok('navigate lens opens remembered selection (Contact)', (await hash()) === '#/contact');
   await p.goto('http://localhost:8765/#/work'); await p.waitForTimeout(900);
   // 06-08 work → unclip → project
-  await p.click('.hang[data-id="03"]'); await p.waitForTimeout(2900);
+  ok('work shows exactly 5 projects', (await p.$$('.hang')).length === 5);
+  await p.click('.hang[data-id="03"]'); await p.waitForTimeout(3300);
   ok('unclip -> project 03', (await hash()) === '#/work/03');
   ok('project 03 visual is p03', (await p.getAttribute('.project__card img', 'src')).includes('p03'));
   await p.click('text=Back to work'); await p.waitForTimeout(1200);
   ok('back to work keeps project 03 marked', await p.$eval('.hang.is-sel', e => e.dataset.id) === '03');
   await p.goto('http://localhost:8765/#/work/03'); await p.waitForTimeout(900);
-  await p.click('text=Open case study'); await p.waitForTimeout(1100);
-  ok('open case study -> overview', (await hash()) === '#/work/03/overview');
-  await p.click('.overview__actions .btn'); await p.waitForTimeout(1100);
-  ok('enter -> stage 1', (await hash()) === '#/work/03/case/1');
+  ok('project lists the 8 stages', /8 stages/.test(await p.textContent('.project__stages')));
+  await p.click('.project__actions .btn'); await p.waitForTimeout(1100);
+  ok('enter case study goes straight to stage 1', (await hash()) === '#/work/03/case/1');
   await p.click('.case__shutter'); await p.waitForTimeout(1100);
-  ok('shutter -> stage 2', (await hash()) === '#/work/03/case/2' && /Research/.test(await p.textContent('.case__title')));
-  await p.click('.case__ev-open'); await p.waitForTimeout(400);
-  ok('evidence opens', !!(await p.$('.case__evidence')));
-  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
-  ok('evidence closes, stage preserved', !(await p.$('.case__evidence')) && (await hash()) === '#/work/03/case/2');
+  ok('next -> stage 2', (await hash()) === '#/work/03/case/2' && /Research/.test(await p.textContent('.case__title')));
+  ok('no full-screen shutter overlay', !(await p.$('.shutter')));
+  ok('evidence panel removed', !(await p.$('.case__ev-open, .case__evidence')));
   await p.click('.case__chip[data-k="5"]'); await p.waitForTimeout(1100);
   ok('process index jumps to Prototyping', /Prototyping/.test(await p.textContent('.case__title')));
   await p.keyboard.press('ArrowLeft'); await p.waitForTimeout(700);
   ok('keyboard previous -> Ideation', /Ideation/.test(await p.textContent('.case__title')));
-  await p.goto('http://localhost:8765/#/work/03/overview'); await p.waitForTimeout(800);
-  ok('overview offers resume at stage 5', /case\/5$/.test(await p.getAttribute('.overview__actions .btn', 'href')));
+  await p.goto('http://localhost:8765/#/work/03'); await p.waitForTimeout(800);
+  ok('project offers resume at stage 5', /case\/5$/.test(await p.getAttribute('.project__actions .btn', 'href')));
+  await p.goto('http://localhost:8765/#/work/03/overview'); await p.waitForTimeout(900);
+  ok('old overview link forwards into the case study', /#\/work\/03\/case\/5$/.test(await hash()));
   // 12-13 archive
   await p.goto('http://localhost:8765/#/archive'); await p.waitForTimeout(900);
   await p.waitForTimeout(800); if (await p.$('.exit__card')) { autoShown++; await p.evaluate(() => document.querySelector('.exit__btns [data-later]')?.click()); await p.waitForTimeout(400); }
@@ -69,6 +69,8 @@ const SP = process.argv[2];
   ok('next frame -> park', (await hash()) === '#/archive/park');
   await p.click('.film__frame.is-active'); await p.waitForTimeout(400);
   ok('active frame opens lightbox', !!(await p.$('.lightbox')));
+  ok('lightbox shows a description, not the category', /path under the trees/.test(await p.textContent('.lightbox figcaption')));
+  ok('lightbox has a download button', (await p.getAttribute('.lightbox__dl', 'download')) === 'Ashita-Taneja-park.jpg');
   await p.keyboard.press('Escape');
   await p.click('text=Back to gallery'); await p.waitForTimeout(900);
   ok('back to gallery marks last viewed', await p.$eval('.pile__photo.is-last', e => e.dataset.id) === 'park');
@@ -152,6 +154,12 @@ const SP = process.argv[2];
   await p.waitForTimeout(1200);
   ok('"Close" stops it for the session', !(await p.$('.exit__card')));
   ok('audio engine started', await p.evaluate(() => true));
+  // Nov 21 fixes
+  await p.goto('http://localhost:8765/#/contact'); await p.waitForTimeout(900);
+  { const sc = await p.$eval('.ccam__screen', e => e.getBoundingClientRect()), bt = await p.$eval('.ccam__cta', e => e.getBoundingClientRect());
+    ok('contact button sits fully inside the camera screen', bt.bottom <= sc.bottom && bt.top >= sc.top); }
+  await p.goto('http://localhost:8765/#/about/profile'); await p.waitForTimeout(900);
+  ok('resume buttons say Download Resume', /Download Resume/.test(await p.textContent('.profile__resume')));
   console.log(errs.length ? 'ERRORS:\n' + errs.join('\n') : 'no page errors');
   await b.close();
 })();

@@ -25,7 +25,7 @@ export async function render() {
     ${deco('burst', 'burst', 'left:52%;top:2%;transform:rotate(-10deg)')}
     <p class="note contact__tip tilt-r">Choose an option<br>from the dial!</p>
     <div class="cdial">
-      <svg class="cdial__arrows" viewBox="0 0 100 100" aria-hidden="true"><path d="M8 26a50 50 0 0 1 16-16M76 92a50 50 0 0 0 16-16" fill="none" stroke="var(--c-paper)" stroke-width="2.2" stroke-linecap="round"/><path d="M5 22l3 6 5-3M88 78l4-4 1 6M21 7l5 1-2 5M78 95l-5-1 2-5" fill="none" stroke="var(--c-paper)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="cdial__arrows c-arrow" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M10 29A46 46 0 0 1 27 11"/><path d="M73 89A46 46 0 0 0 90 71"/></g><g fill="#fff" stroke="#fff" stroke-width="1" stroke-linejoin="round"><path d="M6.4 25.6l4.4 7 3.6-6.2z"/><path d="M24.6 7.4l7.6 2.6-5.4 4.6z"/><path d="M93.6 74.4l-4.4-7-3.6 6.2z"/><path d="M75.4 92.6l-7.6-2.6 5.4-4.6z"/></g></svg>
       <div class="cdial__face" role="radiogroup" aria-label="Contact options — use arrow keys or drag to turn the dial">
         <svg viewBox="0 0 100 100" aria-hidden="true">
           <circle cx="50" cy="50" r="49" fill="var(--c-yellow)" stroke="var(--c-ink)" stroke-width="1.6"/>
@@ -40,17 +40,19 @@ export async function render() {
     ${deco('burst', 'burst', 'left:37%;top:46%;transform:rotate(-20deg)')}
     <div class="ccam">
       <svg class="ccam__body" viewBox="0 0 860 560" aria-hidden="true"><g stroke="var(--c-ink)" stroke-width="8" stroke-linejoin="round">
-        <rect x="290" y="14" width="250" height="70" rx="20" fill="var(--c-hot)"/>
-        <rect x="690" y="20" width="110" height="60" rx="14" fill="var(--c-pink)"/>
-        <rect x="610" y="60" width="200" height="40" rx="14" fill="var(--c-cream)"/>
-        <rect x="806" y="230" width="48" height="230" rx="20" fill="var(--c-yellow)"/>
-        <rect x="14" y="70" width="820" height="470" rx="70" fill="var(--c-cream)"/>
-        <path d="M14 230V140a70 70 0 0 1 70-70h680a70 70 0 0 1 70 70v90z" fill="var(--c-hot)"/>
-        <path d="M14 440v30a70 70 0 0 0 70 70h680a70 70 0 0 0 70-70v-30z" fill="var(--c-hot)"/>
-        <rect x="64" y="110" width="140" height="100" rx="14" fill="var(--c-cream)"/>
-        <rect x="84" y="126" width="100" height="68" rx="8" fill="var(--c-ink)"/>
-        <circle cx="140" cy="320" r="50" fill="var(--c-yellow)"/>
-      </g><path d="M98 140h30v24h-30z" fill="#fff" opacity=".85"/></svg>
+        <rect x="796" y="196" width="54" height="270" rx="24" fill="var(--c-yellow)"/>
+        <rect x="150" y="22" width="180" height="70" rx="18" fill="var(--c-hot)"/>
+        <rect x="612" y="58" width="176" height="36" rx="14" fill="var(--c-cream)"/>
+        <rect x="642" y="24" width="116" height="48" rx="14" fill="var(--c-pink)"/>
+        <rect x="18" y="78" width="800" height="460" rx="66" fill="var(--c-cream)"/>
+        <path d="M18 214V144a66 66 0 0 1 66-66h668a66 66 0 0 1 66 66v70z" fill="var(--c-hot)"/>
+        <path d="M18 472v0a66 66 0 0 0 66 66h668a66 66 0 0 0 66-66z" fill="var(--c-hot)"/>
+        <rect x="58" y="104" width="150" height="88" rx="14" fill="var(--c-cream)"/>
+        <rect x="78" y="120" width="110" height="56" rx="8" fill="var(--c-ink)"/>
+        <circle cx="140" cy="340" r="54" fill="var(--c-yellow)"/>
+      </g>
+      <path d="M92 132h34v18H92z" fill="#fff" opacity=".9"/>
+      <path d="M116 316a28 28 0 0 1 26-12" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".7"/></svg>
       <div class="ccam__screen" aria-live="polite"></div>
       <span class="ccam__flash" aria-hidden="true"></span>
       ${deco('burst', 'burst', 'right:-6%;top:-4%;transform:rotate(15deg)')}

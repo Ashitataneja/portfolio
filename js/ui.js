@@ -45,33 +45,42 @@ export function toast(msg, ms = 2600) {
 import { play } from './sound.js';
 export function shutterSound() { play('shutter'); }
 
-/* ---------- Aperture (SVG) — used by the intro, shutter transitions ---------- */
-// Blades are rectangles whose inner edges are tangent to a circle of radius `d`.
-// Their union leaves a regular N-gon hole; rotating slightly as it opens gives the iris swirl.
-export function apertureSVG({ n = 7, size = 200, open = 0.05, id = 'ap' } = {}) {
+/* ---------- Aperture (SVG) — used by the intro lens and the case-study "next" button ---------- */
+// Each blade is a large sheet whose inner edge is tangent to a circle of radius `d`; together they leave
+// a small N-gon hole. The leading edge of every blade is curved, so the closed iris reads as a pinwheel
+// (like a real lens) instead of straight spokes. Rotating slightly as it opens gives the iris swirl.
+export function apertureSVG({ n = 6, size = 200, id = 'ap', glass = true } = {}) {
   const R = size / 2;
   return `<svg viewBox="${-R} ${-R} ${size} ${size}" class="aperture" data-n="${n}" data-r="${R}" aria-hidden="true">
     <defs>
-      <clipPath id="${id}-clip"><circle r="${R * 0.985}"/></clipPath>
-      <linearGradient id="${id}-blade" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a3b40"/><stop offset=".55" stop-color="#1c1d21"/><stop offset="1" stop-color="#0c0c0e"/></linearGradient>
+      <clipPath id="${id}-clip"><circle r="${R * 0.99}"/></clipPath>
+      <linearGradient id="${id}-blade" gradientUnits="userSpaceOnUse" x1="${-R * 0.25}" y1="${-R * 0.1}" x2="${R * 0.75}" y2="${-R * 0.55}"><stop offset="0" stop-color="#060708"/><stop offset=".5" stop-color="#15171b"/><stop offset="1" stop-color="#2e3138"/></linearGradient>
       <radialGradient id="${id}-glass" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="color-mix(in srgb, var(--c-bg) 55%, #fff)"/><stop offset=".55" stop-color="var(--c-bg)"/><stop offset="1" stop-color="var(--c-bg-deep)"/></radialGradient>
     </defs>
-    <circle r="${R}" fill="url(#${id}-glass)"/>
+    <circle r="${R}" fill="${glass ? `url(#${id}-glass)` : 'transparent'}"/>
     <g clip-path="url(#${id}-clip)" class="blades">${Array.from({ length: n }, (_, i) =>
-      `<g transform="rotate(${(360 / n) * i})"><rect class="blade" fill="url(#${id}-blade)" stroke="#55565c" stroke-width="${R * 0.008}"/></g>`).join('')}
+      `<g transform="rotate(${(360 / n) * i})"><path class="blade" fill="url(#${id}-blade)" stroke="#000" stroke-width="${R * 0.022}" stroke-linejoin="round"/></g>`).join('')}
     </g>
+    <circle r="${R * 0.985}" fill="none" stroke="#050505" stroke-width="${R * 0.03}"/>
   </svg>`;
 }
 export function setAperture(svg, open) {
   const n = +svg.dataset.n, R = +svg.dataset.r;
-  const d = Math.max(0.0001, open) * R;            // inradius of hole
-  const swirl = (1 - open) * 22;                   // degrees
-  svg.querySelectorAll('.blade').forEach(r => {
-    const x0 = -d * Math.tan(Math.PI / n) - R * 0.02;
-    r.setAttribute('x', x0); r.setAttribute('y', -d - R * 2.2);
-    r.setAttribute('width', R * 2.6); r.setAttribute('height', R * 2.2);
-    r.setAttribute('transform', `rotate(${swirl})`);
+  const d = Math.max(0.0001, open) * R;            // inradius of the hole
+  const swirl = (1 - Math.min(open, 1)) * 24;      // degrees
+  const x0 = -d * Math.tan(Math.PI / n) - R * 0.01, yb = -d, yt = -d - R * 2.4, w = R * 2.8;
+  // curved seam from the hole corner out to the rim
+  const dPath = `M${x0} ${yb} C${x0 - R * 0.42} ${yb - R * 0.35} ${x0 - R * 0.55} ${yb - R * 1.1} ${x0 - R * 0.2} ${yt} L${x0 + w} ${yt} L${x0 + w} ${yb} Z`;
+  svg.querySelectorAll('.blade').forEach(p => {
+    p.setAttribute('d', dPath);
+    p.setAttribute('transform', `rotate(${swirl})`);
   });
+}
+/** Decorative curved arrow: solid white, no outline (used on every screen). */
+export function curvedArrow({ viewBox, d, head, cls = '', width = 9 }) {
+  return `<svg class="${cls} c-arrow" viewBox="${viewBox}" aria-hidden="true" focusable="false">
+    <path d="${d}" fill="none" stroke="#fff" stroke-width="${width}" stroke-linecap="round"/>
+    <path d="${head}" fill="#fff" stroke="#fff" stroke-width="${width * .45}" stroke-linejoin="round"/></svg>`;
 }
 export function animate(fromV, toV, ms, onFrame, ease = t => 1 - (1 - t) ** 3) {
   return new Promise(res => {

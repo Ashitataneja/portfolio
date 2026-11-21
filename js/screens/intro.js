@@ -33,7 +33,7 @@ export async function render() {
     <h1 id="intro-h" class="sr-only">Ashita Taneja — portfolio intro</h1>
     <div class="intro__white">
       <div class="lens" aria-hidden="true">
-        <div class="lens__ring">${apertureSVG({ n: 7, size: 200, id: 'intro' })}<span class="lens__glare"></span></div>
+        <div class="lens__ring">${apertureSVG({ n: 6, size: 200, id: 'intro', glass: true })}<span class="lens__glare"><svg viewBox="0 0 100 100"><path d="M64 12C42 16 26 32 20 54" fill="none" stroke="#fff" stroke-width="8.5" stroke-linecap="round"/><circle cx="12" cy="74" r="6" fill="#fff"/></svg></span></div>
       </div>
     </div>
     <div class="intro__capture bg-grid" hidden>
@@ -68,7 +68,7 @@ export async function render() {
   const photo = el.querySelector('.fc-photo');
   let cancelled = false;
 
-  setAperture(svg, 0.02);
+  setAperture(svg, 0.015);
 
   async function showCapture() {
     white.hidden = true;
@@ -86,15 +86,16 @@ export async function render() {
     photo.focus({ preventScroll: true, focusVisible: false });
   }
 
-  async function play() {
-    await wait(450);
+  // (named runIntro: it used to be called `play`, which hid the sound function and restarted the intro)
+  async function runIntro() {
+    await wait(650);
     // 01 — aperture blades open
     play('iris', 1.3);
-    await animate(0.02, 0.32, 1300, v => setAperture(svg, v), t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+    await animate(0.015, 0.34, 1300, v => setAperture(svg, v), t => t < .5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
     if (cancelled) return;
     // 02 — zoom through the aperture
     lens.classList.add('is-zooming'); play('whoosh');
-    await animate(0.32, 1.25, 1250, v => setAperture(svg, v));
+    await animate(0.34, 1.25, 1250, v => setAperture(svg, v));
     if (cancelled) return;
     white.classList.add('is-through');
     await wait(320);
@@ -132,7 +133,7 @@ export async function render() {
 
   return {
     el, title: 'Welcome', noEnter: true, skipVT: true,
-    mounted() { reducedMotion() ? showCapture() : play(); },
+    mounted() { reducedMotion() ? showCapture() : runIntro(); },
     destroy() { cancelled = true; },
   };
 }

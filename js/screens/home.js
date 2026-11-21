@@ -10,7 +10,7 @@ export async function render(_, { go }) {
     ${deco('burst', 'burst', 'left:35%;top:9%;transform:rotate(-10deg) scaleX(-1)')}
     ${deco('sparkle twinkle', 'sparkle', 'left:83%;top:6%')}
     ${deco('sparkle twinkle', 'sparkle', 'left:18%;top:80%')}
-    <span class="deco home__warn" aria-hidden="true"><svg viewBox="0 0 64 56"><use href="#i-warning"/></svg></span>
+    <span class="deco home__hi" aria-hidden="true"><svg viewBox="0 0 120 100"><path d="M18 10h84a14 14 0 0114 14v38a14 14 0 01-14 14H56L32 94l4-18H18A14 14 0 014 62V24a14 14 0 0114-14z" fill="var(--c-pink)" stroke="var(--c-ink)" stroke-width="5" stroke-linejoin="round" transform="translate(4 5)"/><path d="M18 10h84a14 14 0 0114 14v38a14 14 0 01-14 14H56L32 94l4-18H18A14 14 0 014 62V24a14 14 0 0114-14z" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="5" stroke-linejoin="round"/><text x="60" y="56" text-anchor="middle" font-family="Titan One, sans-serif" font-size="34" fill="var(--c-ink)">Hi!</text></svg></span>
     <div class="home__left">
       ${title('Ashita\nTaneja', { id: 'home-h', cls: 'home__name tilt-l' })}
       <div class="home__intro note">

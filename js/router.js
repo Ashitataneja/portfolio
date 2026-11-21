@@ -45,7 +45,10 @@ async function resolve() {
   store.set(s => ({ visited: s.visited.includes(match.key) ? s.visited : [...s.visited, match.key],
     lastRoute: match.key.startsWith('postcard') || match.key === 'intro' ? s.lastRoute : location.hash }));
   if (document.startViewTransition && !reducedMotion() && current && !current.skipVT) {
-    await document.startViewTransition(swap).finished.catch(() => {});
+    // A fast second navigation (or a redirect) can skip this transition; that's expected, so swallow it quietly.
+    const vt = document.startViewTransition(swap);
+    vt.ready.catch(() => {}); vt.updateCallbackDone.catch(() => {});
+    await vt.finished.catch(() => {});
   } else await swap();
   window.dispatchEvent(new CustomEvent('routechange', { detail: { key: match.key, params } }));
 }

@@ -1,5 +1,5 @@
 // Five-destination rotary navigation dial (Homepage + Navigate My World).
-import { h, icon, esc, makeDial, announce, reducedMotion } from './ui.js';
+import { h, icon, esc, makeDial, announce, reducedMotion, curvedArrow } from './ui.js';
 import { NAV } from './content.js';
 import { store } from './state.js';
 import { play } from './sound.js';
@@ -19,8 +19,8 @@ export function navDial({ variant = 'home', onOpen }) {
   const n = NAV.length, rIn = variant === 'home' ? 50 : 40, rOut = 92;
   const el = h(`<div class="dial dial--${variant}">
     <div class="dial__pointer" aria-hidden="true"></div>
-    <button class="dial__spin dial__spin--prev" type="button" data-sound="none" aria-label="Rotate dial anticlockwise"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M52 14C40 4 22 6 12 20" fill="none" stroke="var(--c-ink)" stroke-width="11" stroke-linecap="round"/><path d="M52 14C40 4 22 6 12 20" fill="none" stroke="var(--c-paper)" stroke-width="6" stroke-linecap="round"/><path d="M4 12l6 18 16-8z" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="3" stroke-linejoin="round"/></svg></button>
-    <button class="dial__spin dial__spin--next" type="button" data-sound="none" aria-label="Rotate dial clockwise"><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M50 8c6 14 2 32-10 42" fill="none" stroke="var(--c-ink)" stroke-width="11" stroke-linecap="round"/><path d="M50 8c6 14 2 32-10 42" fill="none" stroke="var(--c-paper)" stroke-width="6" stroke-linecap="round"/><path d="M30 56l18-4-6-16z" fill="var(--c-paper)" stroke="var(--c-ink)" stroke-width="3" stroke-linejoin="round"/></svg></button>
+    <button class="dial__spin dial__spin--prev" type="button" data-sound="none" aria-label="Rotate dial anticlockwise">${curvedArrow({ viewBox: "0 0 60 60", d: "M54 18C44 6 26 6 15 18", head: "M5 13l5 17 15-9z" })}</button>
+    <button class="dial__spin dial__spin--next" type="button" data-sound="none" aria-label="Rotate dial clockwise">${curvedArrow({ viewBox: "0 0 60 60", d: "M47 6c8 12 6 28-4 38", head: "M31 56l18-2-6-17z" })}</button>
     <div class="dial__wheel" role="group" aria-roledescription="rotary dial" aria-label="Navigation dial. Use arrow keys to rotate, Enter to open.">
       <svg class="dial__svg" viewBox="-100 -100 200 200" aria-hidden="true">
         <defs><pattern id="hatch-${variant}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="var(--c-yellow)"/><rect width="2" height="7" fill="color-mix(in srgb, var(--c-ink) 12%, transparent)"/></pattern></defs>

@@ -63,15 +63,23 @@ export async function render({ photo }, { go }) {
   track.addEventListener('pointerdown', e => { sx = e.clientX; });
   track.addEventListener('pointerup', e => { if (sx !== null && Math.abs(e.clientX - sx) > 50) show(i + (e.clientX < sx ? 1 : -1)); sx = null; });
 
+  let closeLightbox = null;
   function lightbox() {
     play('shutter');
     const p = PHOTOS[i];
-    const box = h(`<div class="modal-backdrop lightbox" role="dialog" aria-modal="true" aria-label="Frame ${i + 1}: ${esc(p.alt)}">
-      <figure class="lightbox__fig polaroid">${img(p.img, p.alt, 'loading="eager"')}<figcaption><b>${String(i + 1).padStart(2, '0')}</b> · ${esc(MEMORY_LABEL)}</figcaption></figure>
+    const box = h(`<div class="modal-backdrop lightbox" role="dialog" aria-modal="true" aria-label="Photo ${i + 1}: ${esc(p.caption)}">
+      <div class="lightbox__wrap">
+        <figure class="lightbox__fig polaroid">
+          <span class="lightbox__ph">${img(p.img, p.alt, 'loading="eager"')}</span>
+          <figcaption>${esc(p.caption)}</figcaption>
+        </figure>
+        <a class="btn btn--primary lightbox__dl" href="assets/img/${p.img}.jpg" download="Ashita-Taneja-${p.id}.jpg" data-sound="shutter">${icon('download')} Download photo</a>
+      </div>
       <button class="icon-btn icon-btn--pink lightbox__x" type="button" aria-label="Close">${icon('close')}</button>
     </div>`);
     document.getElementById('overlay-root').appendChild(box);
-    const close = () => { release(); box.remove(); };
+    const close = () => { release(); box.remove(); closeLightbox = null; };
+    closeLightbox = close;
     const release = trapFocus(box, close);
     box.querySelector('.lightbox__x').addEventListener('click', close);
     box.addEventListener('click', e => { if (e.target === box) close(); });
@@ -83,6 +91,6 @@ export async function render({ photo }, { go }) {
   return {
     el, title: 'Memory film roll',
     mounted() { track.style.transition = 'none'; show(i, false); requestAnimationFrame(() => { track.style.transition = ''; }); },
-    destroy() { removeEventListener('resize', onResize); },
+    destroy() { removeEventListener('resize', onResize); closeLightbox?.(); },
   };
 }

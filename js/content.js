@@ -19,17 +19,17 @@ export const CONTACT = {
 };
 
 export const NAV = [
-  { id: 'work', label: 'Work', icon: 'briefcase', icon2: 'folder-o', route: '#/work' },
-  { id: 'archive', label: 'Archive', icon: 'folder', icon2: 'layers', route: '#/archive' },
+  { id: 'work', label: 'Work', icon: 'briefcase', icon2: 'briefcase', route: '#/work' },
+  { id: 'archive', label: 'Archive', icon: 'folder', icon2: 'folder', route: '#/archive' },
   { id: 'notes', label: 'Notes', icon: 'notes', icon2: 'notes', route: '#/notes' },
   { id: 'about', label: 'About', icon: 'user', icon2: 'user', route: '#/about' },
-  { id: 'contact', label: 'Contact', icon: 'mail', icon2: 'mail-o', route: '#/contact' },
+  { id: 'contact', label: 'Contact', icon: 'mail', icon2: 'mail', route: '#/contact' },
 ];
 
-const CATS = ['Product Design', 'UX Design', 'Wearable Design', 'Service Design', 'Research',
-  'Interaction Design', 'Product Design', 'Digital Product', 'Graphic Design', 'Experience Design'];
-const CLIPS = ['pink', 'hot', 'yellow', 'pink', 'hot', 'hot', 'pink', 'yellow', 'hot', 'pink'];
-const TILTS = [-6, 2, 0, 3, -5, 4, 2, -3, 3, -4];
+// Five projects, one clothesline. Replace the TEMPLATE fields below with each project's real details.
+const CATS = ['Product Design', 'UX Design', 'Wearable Design', 'Service Design', 'Research'];
+const CLIPS = ['pink', 'hot', 'yellow', 'pink', 'hot'];
+const TILTS = [-5, 3, -1, 4, -4];
 
 export const PROJECTS = CATS.map((category, i) => {
   const n = String(i + 1).padStart(2, '0');
@@ -61,7 +61,6 @@ export const STAGES = [
       { icon: 'pin', label: 'Location', value: 'India' },
       { icon: 'search', label: 'Method', value: 'Interviews & Observations' },
     ],
-    evidence: { title: 'Evidence', text: 'Interview excerpts from visually impaired users in Delhi.' },
   },
   ...['Research', 'Insights', 'Define', 'Ideation', 'Prototyping', 'Testing', 'Outcome'].map(name => ({
     key: name.toLowerCase(), name,
@@ -69,18 +68,18 @@ export const STAGES = [
     cardTitle: 'Key Insights',
     text: `A short summary of the ${name.toLowerCase()} stage goes here — what was learnt, decided or made, and why it mattered.`, // TEMPLATE
     facts: null,
-    evidence: { title: 'Evidence', text: `Research and process material from the ${name.toLowerCase()} stage.` }, // TEMPLATE
   })),
 ];
 
 // Photography — every image comes from the supplied designs.
+// `caption` is the short description shown under each photo when it is opened. Edit them in your own words.
 export const PHOTOS = [
-  { id: 'sunset', img: 'sunset', alt: 'Sun setting behind trees and street lamps over the city' },
-  { id: 'palace', img: 'palace', alt: 'White domed palace behind gardens of pink flowers' },
-  { id: 'flowers', img: 'flowers', alt: 'Pink bougainvillea against a blue sky' },
-  { id: 'park', img: 'park', alt: 'Tree-lined path through a green park' },
-  { id: 'college', img: 'college', alt: 'Cream heritage building with a central dome' },
-  { id: 'cat', img: 'cat', alt: 'A tabby cat peeking over a ledge' },
+  { id: 'sunset', img: 'sunset', alt: 'Sun setting behind trees and street lamps over the city', caption: 'Golden hour, when the whole city slows down.' },
+  { id: 'palace', img: 'palace', alt: 'White domed palace behind gardens of pink flowers', caption: 'White domes and a garden in full bloom.' },
+  { id: 'flowers', img: 'flowers', alt: 'Pink bougainvillea against a blue sky', caption: 'Bougainvillea against a perfectly blue sky.' },
+  { id: 'park', img: 'park', alt: 'Tree-lined path through a green park', caption: 'A quiet path under the trees, made for slow walks.' },
+  { id: 'college', img: 'college', alt: 'Cream heritage building with a central dome', caption: 'Old walls, afternoon light and a clock tower.' },
+  { id: 'cat', img: 'cat', alt: 'A tabby cat peeking over a ledge', caption: 'A curious neighbour who stopped to say hello.' },
 ];
 export const MEMORY_LABEL = 'Places & Experiences';
 export const POSTCARD_PHOTOS = ['palace', 'flowers', 'sunset', 'park', 'cat'];

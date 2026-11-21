@@ -7,7 +7,9 @@ export function resumeInfo() {
     .catch(() => false)
     .then(ok => ok
       ? { available: true, href: CONTACT.resume, download: 'Ashita-Taneja-Resume.pdf', label: 'Download Resume' }
-      : { available: false, href: `mailto:${CONTACT.email}?subject=${encodeURIComponent('Resume request')}&body=${encodeURIComponent('Hi Ashita, could you share your resume?')}`, label: 'Request Resume' });
+      // The button always reads "Download Resume". Until the PDF is added at CONTACT.resume it falls back to an
+      // email request, so the live site never shows a broken link.
+      : { available: false, href: `mailto:${CONTACT.email}?subject=${encodeURIComponent('Resume request')}&body=${encodeURIComponent('Hi Ashita, could you share your resume?')}`, label: 'Download Resume' });
   return cached;
 }
 export async function wireResume(a) {
@@ -15,6 +17,5 @@ export async function wireResume(a) {
   a.href = r.href;
   if (r.download) a.setAttribute('download', r.download); else a.removeAttribute('download');
   const lab = a.querySelector('[data-label]'); if (lab) lab.textContent = r.label;
-  if (!r.available) a.title = 'Opens an email to request the resume';
   return r;
 }
